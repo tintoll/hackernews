@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 
@@ -8,24 +7,6 @@ const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 
-const list = [
-  {
-    title : 'React',
-    url : 'https://reactjs.org',
-    author : 'Jordan walke',
-    num_comments : 3,
-    points : 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://github.com/reactjs/redux',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-]
 const isSearched = searchTerm => 
       item => item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -50,15 +31,20 @@ class App extends Component {
     const { searchTerm } = this.state;
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
-      .then(result => this.setSearchTopStories(result))
+      .then(result => {
+        return this.setSearchTopStories(result)
+      })
       .catch(error => error);
   }
 
   onDismiss(id) {
     const isNotId = item => item.objectID !== id; 
-    const updatedList = this.state.list.filter(isNotId);
+    const updatedHits = this.state.result.hits.filter(isNotId);
+    //  hits기사만 업데이트 하기 위해서 Object.assign을 사용 
+    // Object.assign()을 전개연산자로 대체할수있음.
     this.setState({
-      list : updatedList
+      // result: Object.assign({}, this.state.result, {hists:updatedHits})
+      result : {...this.state.result, hits:updatedHits}
     });
   }
   onSearchChange(event) {

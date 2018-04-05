@@ -22,19 +22,23 @@ class App extends Component {
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
   }
+
   setSearchTopStories(result) {
     this.setState({result});
   }
-
-  componentDidMount() {
-    const { searchTerm } = this.state;
+  fetchSearchTopStories(searchTerm) {
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
       .then(response => response.json())
       .then(result => {
         return this.setSearchTopStories(result)
       })
       .catch(error => error);
+  }
+  componentDidMount() {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
   }
 
   onDismiss(id) {
@@ -52,42 +56,51 @@ class App extends Component {
       searchTerm : event.target.value
     });
   }
+  onSearchSubmit(event) {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopStories(searchTerm);
+    event.preventDefault();
+  }
 
   render() {
     const { searchTerm, result } = this.state;
-    if(!result) {return null;}
+    // if(!result) {return null;}
     return (
       <div className="page">
         <div className="interactions">
           <Search 
             value={searchTerm}
-            onChange={this.onSearchChange}>
+            onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}>
             Search
           </Search>
-          <Table 
-            list={result.hits}
-            pattern={searchTerm}
-            onDismiss={this.onDismiss}/>
+          {
+            result &&
+            <Table
+              list={result.hits}
+              onDismiss={this.onDismiss} />
+          }
+          
         </div>
       </div>
     );
   }
 }
 
-const Search = ({ value, onChange, children }) => {
+const Search = ({ value, onSubmit, onChange, children }) => {
   return (
-    <form>
-      {children}
+    <form onSubmit={onSubmit}>
       <input type="text"
         value={value}
         onChange={onChange} />
+      <button type="submit">{children}</button>  
     </form>
   )
 }
-const Table = ({ list, pattern, onDismiss }) => {
+const Table = ({ list, onDismiss }) => {
   return (
     <div className="table">
-      {list.filter(isSearched(pattern)).map(item =>
+      {list.map(item =>
         <div key={item.objectID} className="table-row">
           <span style={{ width: '40%' }}><a href={item.url}>{item.title}</a></span>
           <span style={{ width: '30%' }}>{item.author}</span>

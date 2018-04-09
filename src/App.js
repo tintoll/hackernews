@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import './App.css';
 
 
@@ -10,10 +11,12 @@ const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
 const PARAM_HPP = 'hitsPerPage='
-const isSearched = searchTerm => 
-      item => item.title.toLowerCase().includes(searchTerm.toLowerCase());
+ // const isSearched = searchTerm => 
+ //     item => item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
 class App extends Component {
+  _isMounted = false;
+
   constructor(props) {
     super(props);
     // 객체 초기화 
@@ -51,20 +54,32 @@ class App extends Component {
     });
   }
   fetchSearchTopStories(searchTerm, page = 0) {
+    /* // fetch api 사용
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
       .then(response => response.json())
       .then(result => {
         return this.setSearchTopStories(result)
       })
       .catch(error => this.setState({error}));
+     */
+    // axios 사용 
+    axios.get(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
+      .then(result => {
+        return this._isMounted && this.setSearchTopStories(result.data)
+      })
+      .catch(error => this._isMounted && this.setState({error}));
   }
   componentDidMount() {
+    this._isMounted = true;
     const { searchTerm } = this.state;
     // 캐시내 현재 결과를 가리키는 포인터 역할 
     this.setState({
       searchKey : searchTerm
     });
     this.fetchSearchTopStories(searchTerm);
+  }
+  componentWillMount() {
+    this._isMounted = false;
   }
 
   onDismiss(id) {

@@ -23,7 +23,7 @@ const Table = ({ list, onDismiss }) => {
   )
 }
 
-Table.PropTypes = {
+Table.propTypes = {
   list: PropTypes.arrayOf(
     PropTypes.shape({
       objectID: PropTypes.string.isRequired,

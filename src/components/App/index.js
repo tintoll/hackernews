@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+
 // import fetch from 'isomorphic-fetch';
 import './index.css';
 import {
@@ -15,6 +16,8 @@ import Table from '../Table';
 import Button from '../Button';
 import Search from '../Search';
 import Loading from '../Loading';
+
+
 
 // const isSearched = searchTerm => 
 //     item => item.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -36,15 +39,22 @@ class App extends Component {
       searchKey: '',
       searchTerm: DEFAULT_QUERY,
       error: null,
-      isLoading : false
+      isLoading : false,
+      sortKey : 'NONE',
+      isSortReverse : false,
     }
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.onSort = this.onSort.bind(this);
   }
 
+  onSort(sortKey) {
+    const isSortReverse = this.state.sortKey === sortKey && !this.state.isSortReverse;
+    this.setState({sortKey, isSortReverse});
+  }
   needsToSearchTopStories(searchTerm) {
     return !this.state.results[searchTerm];
   }
@@ -129,7 +139,9 @@ class App extends Component {
   }
 
   render() {
-    const { searchTerm, results, searchKey, error, isLoading } = this.state;
+    const { searchTerm, results, 
+            searchKey, error, 
+            isLoading, sortKey, isSortReverse} = this.state;
 
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
     // if(!result) {return null;}
@@ -156,6 +168,9 @@ class App extends Component {
               :
               <Table
                 list={list}
+                sortKey={sortKey}
+                isSortReverse={isSortReverse}
+                onSort={this.onSort}
                 onDismiss={this.onDismiss} />
           }
 

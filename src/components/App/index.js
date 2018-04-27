@@ -27,6 +27,20 @@ const withLoading = (Component) => ({isLoading, ...rest}) => {
 }
 const ButtonWithLoading = withLoading(Button);
 
+// 함수를 반환하는 고차함수로 만듬.
+const updateSearchTopStoriesState = (hits, page) => prevState => {
+  const { searchKey, results } = prevState;
+
+  const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
+  const updatedHits = [...oldHits, ...hits];
+  return {
+    results: {
+      ...results,
+      [searchKey]: { hits: updatedHits, page }
+    },
+    isLoading: false
+  };
+};
 class App extends Component {
   _isMounted = false;
 
@@ -54,21 +68,11 @@ class App extends Component {
   }
   setSearchTopStories(result) {
     const { hits, page } = result;
-    const { searchKey, results } = this.state;
-
-    const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
-    const updatedHits = [
-      ...oldHits,
-      ...hits
-    ];
-    this.setState({
-      results: {
-        ...results,
-        [searchKey]: { hits: updatedHits, page }
-      },
-      isLoading : false
-    });
+    // setState는 비동기로 동작하며 
+    // 객체 말고 함수를 넘길수도 있다. 사용하는 이유는 prevState를 참조하는 경우가 있기때문에 
+    this.setState(updateSearchTopStoriesState(hits,page));
   }
+
   fetchSearchTopStories(searchTerm, page = 0) {
     /* // fetch api 사용
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
